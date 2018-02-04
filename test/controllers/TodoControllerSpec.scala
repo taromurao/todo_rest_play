@@ -13,6 +13,7 @@ import play.api.test.Helpers._
  */
 class TodoControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting {
 
+  //TODO
   "HomeController GET" should {
 
     "render the index page from a new instance of controller" in {
