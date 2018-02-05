@@ -14,10 +14,10 @@ class UserController @Inject()(
                                 cc: ControllerComponents
                               ) extends AbstractController(cc) {
 
-  val OK_RESPONSE_JSON = JsObject(Seq("data" -> JsObject(Seq("response" -> JsString("created")))))
-  val INVALID_RESPONSE_JSON = JsObject(Seq("data" -> JsObject(Seq("response" -> JsString("invalid")))))
+  val CREATED_STRING = "created"
+  val INVALID_STRING = "invalid input"
 
-  implicit val rds = (
+  implicit val rds: Reads[(Email, String)] = (
     (__ \ 'email).read[Email] and
     (__ \ 'password).read[String]
   ) tupled
@@ -26,9 +26,11 @@ class UserController @Inject()(
     request.body.validate[(Email, String)] map {
       case (email, password) => {
         userRepository.create(email, password)
-        Created(OK_RESPONSE_JSON)
+        Created(jsResponse(JsString(CREATED_STRING)))
       }
-      case _ => BadRequest(INVALID_RESPONSE_JSON)
-    } recoverTotal { _ => BadRequest(INVALID_RESPONSE_JSON) }
+      case _ => BadRequest(JsString(INVALID_STRING))
+    } recoverTotal { _ => BadRequest(JsString(INVALID_STRING)) }
   }
+
+  private def jsResponse(data: JsValue): JsObject = JsObject(Seq("data" -> JsObject(Seq("response" -> data))))
 }
