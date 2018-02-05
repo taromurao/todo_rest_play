@@ -3,7 +3,7 @@ package integration
 import language.postfixOps
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{JsObject, JsString, Json}
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import play.api.test.Helpers._
 
@@ -16,10 +16,10 @@ class UserIT extends PlaySpec with GuiceOneServerPerSuite {
       val wsClient = app.injector.instanceOf[WSClient]
       val hostPort: String = s"localhost:$port"
       val uri: String = s"http://$hostPort/users"
-      val data: JsObject = Json.obj(
-        "email" -> "john@example.com",
-        "password" -> "1234567890"
-      )
+      val data: JsObject = JsObject(Seq(
+        "email" -> JsString("john@example.com"),
+        "password" -> JsString("1234567890")
+      ))
       val request: WSRequest = wsClient
         .url(uri)
         .addHttpHeaders(

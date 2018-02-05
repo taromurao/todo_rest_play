@@ -1,29 +1,29 @@
 package controllers
 
-import models.User
+import models._
 import org.scalatest.mockito.MockitoSugar
-
-import language.postfixOps
 import org.scalatestplus.play._
 import org.scalatestplus.play.guice._
-import play.api.libs.json.{JsString, Json}
+import play.api.libs.json._
+import play.api.mvc.Result
 import play.api.test._
 import play.api.test.Helpers._
 import repositories.UserRepository
 
-class UserControllerSpec extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar {
-  "UserController POST" must {
-    "create a new user if data does not consist an id" in {
-      val userRepository: UserRepository = mock[UserRepository]{
-        def save(user: User) = user.id
-      }
+import scala.concurrent.Future
 
-      val controller: UserController = new UserController(stubControllerComponents(), userRepository)
-       val json = Json.obj(
-            "email" -> JsString("john@example.com"),
-            "password" -> JsString("1234567890")
-       )
-      val result = controller
+class UserControllerSpec extends PlaySpec with MockitoSugar {
+  "UserController POST" must {
+    "create a new user" in {
+      val userRepository = mock[UserRepository]
+      val controller: UserController = new UserController(userRepository, stubControllerComponents())
+      val json = JsObject(
+        Seq(
+          "email" -> JsString("john@example.com"),
+          "password" -> JsString("1234567890")
+      ))
+
+      val result: Future[Result] = controller
         .create()(
           FakeRequest(
             method = POST,
@@ -34,7 +34,9 @@ class UserControllerSpec extends PlaySpec with GuiceOneAppPerSuite with MockitoS
 
       status(result) mustBe CREATED
       contentType(result) mustBe Some("application/json")
-//      contentAsString(result) must include("Welcome to Play")
+      contentAsJson(result) mustBe JsObject(
+        Seq("data" -> JsObject(Seq("response" -> JsString("created")))))
     }
   }
 }
+

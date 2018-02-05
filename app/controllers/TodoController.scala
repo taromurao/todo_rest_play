@@ -8,7 +8,7 @@ import play.api.mvc._
 @Singleton
 class TodoController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
-  def index() = Action { implicit request: Request[AnyContent] =>
+  def index = Action { implicit request: Request[AnyContent] =>
     Ok(Json.toJson("hello"))
   }
 }
