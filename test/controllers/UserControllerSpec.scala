@@ -1,9 +1,7 @@
 package controllers
 
-import models._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play._
-import org.scalatestplus.play.guice._
 import play.api.libs.json._
 import play.api.mvc.Result
 import play.api.test._
@@ -29,8 +27,7 @@ class UserControllerSpec extends PlaySpec with MockitoSugar {
             method = POST,
             uri = "/users",
             headers = FakeHeaders(Seq(("Content-type", "application/json"))),
-            body = json
-          ))
+            body = json))
 
       status(result) mustBe CREATED
       contentType(result) mustBe Some("application/json")
