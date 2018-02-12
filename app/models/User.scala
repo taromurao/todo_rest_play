@@ -1,3 +1,5 @@
 package models
 
-case class User(email: Email, password: String, salt: String)
+import java.util.UUID
+
+case class User(id: UUID, email: Email, password: String, salt: String)

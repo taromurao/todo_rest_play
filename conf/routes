@@ -3,11 +3,9 @@
 # https://www.playframework.com/documentation/latest/ScalaRouting
 # ~~~~
 
-# An example controller showing a sample home page
-GET     /                           controllers.TodoController.index
-
-# UserController
-POST    /users                      controllers.UserController.create
+# TodoController
+GET     /users/:userId/todos       controllers.TodoController.index(userId: java.util.UUID)
+POST    /users/:userId/todos       controllers.TodoController.create(userId: java.util.UUID)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

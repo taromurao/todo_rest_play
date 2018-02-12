@@ -1,10 +1,12 @@
 package integration
 
+import models.Todo
 import org.scalatest.BeforeAndAfterAll
-import play.api.libs.json.{JsArray, JsObject, JsString}
 import play.api.libs.ws._
+import play.api.libs.json._
 import play.api.test.Helpers._
 
+import scala.collection.immutable.Set
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
@@ -19,7 +21,7 @@ class TodoIT extends BaseIT with BeforeAndAfterAll{
       val response: WSResponse = getTodos()
       response.status mustBe OK
 
-      (response.json \ "data").as[Set[JsObject]] mustBe Set(todo1, todo2)
+      response.json.validate[Set[Todo]].getOrElse(None) mustBe Set(todo1, todo2)
     }
   }
 
@@ -29,19 +31,15 @@ class TodoIT extends BaseIT with BeforeAndAfterAll{
     .url(uri)
     .addHttpHeaders("Content-Type" -> "application/json")
 
-  private def createTodo(todo: JsObject): WSResponse = Await.result(request.post(todo), 1000 millis)
+  private def createTodo(todo: Todo): WSResponse = {
+    Await.result(request.post(Json.toJson(todo)), 1000 millis)
+  }
 
   private def getTodos(): WSResponse = Await.result(request.get(), 1000 millis)
 
-  private val todo1: JsObject = JsObject(Seq(
-    "title" -> JsString("a todo"),
-    "content" -> JsString("Do this.")
-  ))
+  private val todo1: Todo = Todo("a todo", "Do this.")
 
-  private val todo2: JsObject = JsObject(Seq(
-    "title" -> JsString("another todo"),
-    "content" -> JsString("This is a tough one.")
-  ))
+  private val todo2: Todo = Todo("another todo", "This is a tough one.")
 
   //  override def beforeAll: Unit = createUser()
 
