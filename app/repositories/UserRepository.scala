@@ -13,4 +13,6 @@ trait UserRepository {
     User(UUID.randomUUID(), email, BCrypt.hashpw(password, salt), salt)
     // TODO: save user
   }
+
+  def get(id: UUID): Option[User]
 }

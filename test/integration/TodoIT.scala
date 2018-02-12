@@ -10,6 +10,8 @@ import scala.collection.immutable.Set
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
+import testHelpers._
+
 class TodoIT extends BaseIT with BeforeAndAfterAll{
 
   "A user" must{
@@ -36,10 +38,6 @@ class TodoIT extends BaseIT with BeforeAndAfterAll{
   }
 
   private def getTodos(): WSResponse = Await.result(request.get(), 1000 millis)
-
-  private val todo1: Todo = Todo("a todo", "Do this.")
-
-  private val todo2: Todo = Todo("another todo", "This is a tough one.")
 
   //  override def beforeAll: Unit = createUser()
 

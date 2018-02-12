@@ -10,24 +10,25 @@ import repositories.UserRepository
 
 import scala.concurrent.Future
 
-class UserControllerSpec extends PlaySpec with MockitoSugar {
+import testHelpers._
+
+class UserControllerSpec extends PlaySpec with MockitoSugar{
+  private val userRepository = mock[UserRepository]
+  private val controller: UserController = new UserController(userRepository, stubControllerComponents())
+
   "UserController POST" must {
     "create a new user" in {
-      val userRepository = mock[UserRepository]
-      val controller: UserController = new UserController(userRepository, stubControllerComponents())
       val json = JsObject(
         Seq(
-          "email" -> JsString("john@example.com"),
-          "password" -> JsString("1234567890")
+          "email" -> JsString(AN_ENAIL),
+          "password" -> JsString(A_PASSWORD)
       ))
-
-      val result: Future[Result] = controller
-        .create()(
-          FakeRequest(
-            method = POST,
-            uri = "/users",
-            headers = FakeHeaders(Seq(("Content-type", "application/json"))),
-            body = json))
+      val request = FakeRequest(
+          method = POST,
+          uri = "/users",
+          headers = FakeHeaders(Seq(("Content-Type", "application/json"))),
+          body = json)
+      val result: Future[Result] = controller.create()(request)
 
       status(result) mustBe CREATED
       contentType(result) mustBe Some("application/json")

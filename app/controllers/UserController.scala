@@ -14,10 +14,11 @@ class UserController @Inject()(
                                 cc: ControllerComponents
                               ) extends AbstractController(cc) {
 
-  val CREATED_STRING = "created"
-  val INVALID_STRING = "invalid input"
+  private val CREATED_STRING = "created"
 
-  implicit val rds: Reads[(Email, String)] = (
+  private val INVALID_STRING = "invalid input"
+
+  implicit private val rds: Reads[(Email, String)] = (
     (__ \ 'email).read[Email] and
     (__ \ 'password).read[String]
   ) tupled
