@@ -3,6 +3,7 @@ package controllers
 import java.util.UUID
 import javax.inject._
 
+import models.Todo
 import play.api.libs.json._
 import play.api.mvc._
 import repositories.{TodoRepository, UserRepository}
@@ -24,6 +25,16 @@ class TodoController @Inject()(
   }
 
   def create(userId: UUID): Action[JsValue] = Action(parse.json) { implicit request =>
-    Created(JsObject(Seq()))
+    userRepository.get(userId) match {
+      case Some(user) => {
+        request.body.validate[Todo] map {
+          case todo@Todo(_, _) => {
+            todoRepository.saveForUser(user, todo)
+            Created(JsObject(Seq("response" -> JsString("created"))))
+          }
+          case _ => BadRequest(JsObject(Seq("response" -> JsString("failed"))))
+        }
+      }
+    }
   }
 }

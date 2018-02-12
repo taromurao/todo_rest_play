@@ -7,7 +7,7 @@ import org.scalatestplus.play._
 import play.api.test._
 import play.api.test.Helpers._
 import org.mockito.Mockito._
-import play.api.libs.json.JsObject
+import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
 import repositories.{TodoRepository, UserRepository}
 import testHelpers._
@@ -43,28 +43,26 @@ class TodoControllerSpec extends PlaySpec with BeforeAndAfterAll with MockitoSug
       contentType(result) mustBe Some("application/json")
       (contentAsJson(result) \ "data").validate[Set[Todo]].getOrElse(None) mustBe Set(todo1, todo2)
     }
-//
-//    "render the index page from the application" in {
-//      val controller = inject[TodoController]
-//      val home = controller.index().apply(FakeRequest(GET, "/"))
-//
-//      status(home) mustBe OK
-//      contentType(home) mustBe Some("text/html")
-//      contentAsString(home) must include ("Welcome to Play")
-//    }
-//
-//    "render the index page from the router" in {
-//      val request = FakeRequest(GET, "/")
-//      val home = route(app, request).get
-//
-//      status(home) mustBe OK
-//      contentType(home) mustBe Some("text/html")
-//      contentAsString(home) must include ("Welcome to Play")
-//    }
+  }
+
+  "TodoController POST" must {
+    "create a todo" in {
+      val request = FakeRequest(
+        method = POST,
+        uri = s"/users/$A_USER_ID/todos",
+        headers = FakeHeaders(Seq("Content-Type" -> "application/json")),
+        body = Json.toJson(todo1)
+      )
+      val result: Future[Result] = controller.create(A_USER_ID)(request)
+
+      status(result) mustBe CREATED
+      contentType(result) mustBe Some("application/json")
+      // TODO: test method call
+    }
+  }
 
 //    private def createUser(): Unit = {
 //      val todoRepository: TodoRepository = new TodoRepository(stubControllerComponents()) {}
 //      todoRepository.save()
 //    }
-  }
 }
