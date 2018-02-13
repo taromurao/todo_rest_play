@@ -31,7 +31,7 @@ class TodoController @Inject()(
       case Some(user) => {
         request.body.validate[Todo] map {
           case todo @ Todo(_, _) => {
-            todoRepository.saveForUser(user, todo)
+            todoRepository.save(user, todo)
             Created(JsObject(Seq("response" -> JsString("created"))))
           }
           case _ => BAD_REQUEST_RESPONSE
