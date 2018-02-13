@@ -57,7 +57,7 @@ class TodoControllerSpec extends PlaySpec with BeforeAndAfterAll with MockitoSug
 
       status(result) mustBe CREATED
       contentType(result) mustBe Some("application/json")
-      // TODO: test method call
+      verify(todoRepository, times(1)).saveForUser(A_USER, todo1)
     }
   }
 

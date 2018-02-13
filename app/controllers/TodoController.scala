@@ -14,13 +14,15 @@ class TodoController @Inject()(
                                 userRepository: UserRepository,
                                 cc: ControllerComponents) extends AbstractController(cc) {
 
+  private val BAD_REQUEST_RESPONSE = BadRequest(JsObject(Seq("response" -> JsString("failed"))))
+
   def index(userId: UUID): Action[JsValue] = Action(parse.json) { implicit request =>
     userRepository.get(userId) match {
       case Some(user) => Ok(JsObject(Seq(
         "response" -> JsString("ok"),
         "data" -> Json.toJson(todoRepository.ofUser(user))
       )))
-      case _ => NotFound(JsObject(Seq("response" -> JsString("failed"))))
+      case _ => BAD_REQUEST_RESPONSE
     }
   }
 
@@ -28,13 +30,14 @@ class TodoController @Inject()(
     userRepository.get(userId) match {
       case Some(user) => {
         request.body.validate[Todo] map {
-          case todo@Todo(_, _) => {
+          case todo @ Todo(_, _) => {
             todoRepository.saveForUser(user, todo)
             Created(JsObject(Seq("response" -> JsString("created"))))
           }
-          case _ => BadRequest(JsObject(Seq("response" -> JsString("failed"))))
-        }
+          case _ => BAD_REQUEST_RESPONSE
+        } recoverTotal { _ => BAD_REQUEST_RESPONSE }
       }
+      case _ => BAD_REQUEST_RESPONSE
     }
   }
 }

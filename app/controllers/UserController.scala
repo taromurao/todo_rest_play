@@ -23,11 +23,11 @@ class UserController @Inject()(
     (__ \ 'password).read[String]
   ) tupled
 
-  def create: Action[JsValue] = Action(parse.json) { request =>
+  def create: Action[JsValue] = Action(parse.json) { implicit request =>
     request.body.validate[(Email, String)] map {
       case (email, password) => {
         userRepository.create(email, password)
-        Created(jsResponse(JsString(CREATED_STRING)))
+        Created(JsString(CREATED_STRING))
       }
       case _ => BadRequest(JsString(INVALID_STRING))
     } recoverTotal { _ => BadRequest(JsString(INVALID_STRING)) }
