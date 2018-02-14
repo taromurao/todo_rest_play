@@ -23,7 +23,19 @@ class TodoIT extends BaseIT with BeforeAndAfterAll{
       val response: WSResponse = getTodos()
       response.status mustBe OK
 
-      response.json.validate[Set[Todo]].getOrElse(None) mustBe Set(todo1, todo2)
+      val todos: Set[Todo] = response.json.validate[Set[Todo]].get
+      val titles: Set[String] = todos map (_.title)
+      val contents: Set[String] = todos map (_.content)
+
+      todos.size mustBe 2
+
+      titles must contain (todo1.title)
+
+      titles must contain (todo2.title)
+
+      contents must contain (todo1.content)
+
+      contents must contain (todo2.content)
     }
   }
 
@@ -34,22 +46,11 @@ class TodoIT extends BaseIT with BeforeAndAfterAll{
     .addHttpHeaders("Content-Type" -> "application/json")
 
   private def createTodo(todo: Todo): WSResponse = {
-    Await.result(request.post(Json.toJson(todo)), 1000 millis)
+    val json: JsObject =
+      JsObject(Seq("title" -> JsString(todo.title), "content" -> JsString(todo.content)))
+
+    Await.result(request.post(json), 1000 millis)
   }
 
   private def getTodos(): WSResponse = Await.result(request.get(), 1000 millis)
-
-  //  override def beforeAll: Unit = createUser()
-
-  //  "Unauthorised request" must{
-  //    "be rejected" in{
-  //      val uri: String = s"$host/users/$AN_EMAIL/todos"
-  //      val request: WSRequest = wsClient
-  //        .url(uri)
-  //        .addHttpHeaders("Content-Type" -> "application/json")
-  //      val response: WSResponse = Await.result(request.get(), 1000 millis)
-  //
-  //      response.status mustBe UNAUTHORIZED
-  //    }
-  //  }
 }
