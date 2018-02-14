@@ -25,6 +25,6 @@ abstract class BaseIT extends PlaySpec with GuiceOneServerPerSuite with BeforeAn
 
   protected def createUser(): Unit = {
     val userRepository: UserRepository = app.injector.instanceOf[UserRepository]
-    userRepository.create(AN_EMAIL, A_PASSWORD)
+    userRepository.create(A_USER_ID, AN_EMAIL, A_PASSWORD)
   }
 }

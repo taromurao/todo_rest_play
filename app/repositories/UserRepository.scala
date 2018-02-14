@@ -8,10 +8,11 @@ import org.mindrot.jbcrypt.BCrypt
 
 @ImplementedBy(classOf[AnormUserRepository])
 trait UserRepository {
+  def create(id: UUID, email: Email, password: String): Unit
+
   def create(email: Email, password: String): Unit = {
-    val salt: String = BCrypt.gensalt()
-    User(UUID.randomUUID(), email, BCrypt.hashpw(password, salt), salt)
-    // TODO: save user
+    val id: UUID = UUID.randomUUID()
+    create(id, email, password)
   }
 
   def get(id: UUID): Option[User]

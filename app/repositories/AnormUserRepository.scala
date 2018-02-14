@@ -13,8 +13,8 @@ import play.api.Logger
 import scala.util.{Success, Try}
 
 class AnormUserRepository @Inject()(db: Database) extends UserRepository {
-  override def create(email: Email, password: String): Unit = {
-    val user: User = newUser(email, password)
+  override def create(id: UUID, email: Email, password: String): Unit = {
+    val user: User = newUser(id, email, password)
     val query: SqlQuery = SQL(s"""
       INSERT INTO users (id, email, password, salt)
       VALUES ('${user.id}', '${user.email}', '${user.password}', '${user.salt}')
@@ -28,23 +28,17 @@ class AnormUserRepository @Inject()(db: Database) extends UserRepository {
 
     db.withConnection[Option[User]] { implicit conn: Connection =>
       Try(query.as(userParser.single)) match {
-        case Success(user) => {
-          Logger.info(s"Got user $user")
-          Some(user)
-        }
-        case _ => {
-          Logger.info("Could not fetch user.")
-          None
-        }
+        case Success(user) => Some(user)
+        case _ => None
       }
     }
   }
 
   private val userParser: RowParser[User] = Macro.namedParser[User]
 
-  private def newUser(email: Email, password: String): User = {
+  private def newUser(id: UUID, email: Email, password: String): User = {
     val salt: String = BCrypt.gensalt()
     val passwordHash: String = BCrypt.hashpw(password, BCrypt.gensalt())
-    User(UUID.randomUUID(), email, passwordHash, salt)
+    User(id, email, passwordHash, salt)
   }
 }
