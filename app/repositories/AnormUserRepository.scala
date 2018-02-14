@@ -8,7 +8,6 @@ import anorm._
 import play.api.db._
 import models.{Email, User}
 import org.mindrot.jbcrypt.BCrypt
-import play.api.Logger
 
 import scala.util.{Success, Try}
 

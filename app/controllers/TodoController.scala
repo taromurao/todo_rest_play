@@ -30,7 +30,7 @@ class TodoController @Inject()(
     userRepository.get(userId) match {
       case Some(user) => {
         request.body.validate[Todo] map {
-          case todo @ Todo(_, _) => {
+          case todo @ Todo(_, _, _) => {
             todoRepository.save(user, todo)
             Created(JsObject(Seq("response" -> JsString("created"))))
           }
