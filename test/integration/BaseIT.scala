@@ -6,12 +6,8 @@ import models.Email
 import org.scalatest.BeforeAndAfterAll
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import play.api.libs.json._
 import play.api.libs.ws._
-import play.api.test.Helpers._
-
-import scala.concurrent.Await
-import scala.concurrent.duration._
+import repositories.UserRepository
 
 abstract class BaseIT extends PlaySpec with GuiceOneServerPerSuite with BeforeAndAfterAll{
 
@@ -23,17 +19,12 @@ abstract class BaseIT extends PlaySpec with GuiceOneServerPerSuite with BeforeAn
   protected val host: String = s"http://localhost:$port"
 
 
-  protected def createUser(): Unit = {
-    val data: JsObject = JsObject(Seq(
-      "email" -> JsString(AN_EMAIL),
-      "password" -> JsString(A_PASSWORD)))
-    val uri = s"$host/users"
-    val request: WSRequest = wsClient
-      .url(uri)
-      .addHttpHeaders("Content-Type" -> "application/json")
-      .withRequestTimeout(10000 millis)
+  override def beforeAll() {
+    createUser()
+  }
 
-    val response: WSResponse = Await.result(request.post(data), 1000 millis)
-    response.status mustBe CREATED
+  protected def createUser(): Unit = {
+    val userRepository: UserRepository = app.injector.instanceOf[UserRepository]
+    userRepository.create(AN_EMAIL, A_PASSWORD)
   }
 }
