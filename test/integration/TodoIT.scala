@@ -2,6 +2,7 @@ package integration
 
 import models.Todo
 import org.scalatest.BeforeAndAfterAll
+import play.api.Logger
 import play.api.libs.ws._
 import play.api.libs.json._
 import play.api.test.Helpers._
@@ -9,7 +10,6 @@ import play.api.test.Helpers._
 import scala.collection.immutable.Set
 import scala.concurrent.Await
 import scala.concurrent.duration._
-
 import testHelpers._
 
 class TodoIT extends BaseIT with BeforeAndAfterAll{
@@ -21,9 +21,10 @@ class TodoIT extends BaseIT with BeforeAndAfterAll{
       createTodo(todo2).status mustBe CREATED
 
       val response: WSResponse = getTodos()
+
       response.status mustBe OK
 
-      val todos: Set[Todo] = response.json.validate[Set[Todo]].get
+      val todos: Set[Todo] = (response.json \ "data").validate[Set[Todo]].get
       val titles: Set[String] = todos map (_.title)
       val contents: Set[String] = todos map (_.content)
 

@@ -8,7 +8,7 @@ import play.api.db.Database
 
 class AnormTodoRepository @Inject()(db: Database) extends TodoRepository {
   override def ofUser(user: User): List[Todo] = {
-    val query: SqlQuery = SQL(s"SELCT * from todos WHERE user_id='${user.id}'")
+    val query: SqlQuery = SQL(s"SELECT * from todos WHERE user_id='${user.id}'")
 
     db.withConnection[List[Todo]] { implicit conn: Connection => query.as(todoParser.*) }
   }

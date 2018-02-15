@@ -7,7 +7,7 @@ import org.scalatestplus.play._
 import play.api.test._
 import play.api.test.Helpers._
 import org.mockito.Mockito._
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.Json
 import play.api.mvc.Result
 import repositories.{TodoRepository, UserRepository}
 import testHelpers._
@@ -32,11 +32,7 @@ class TodoControllerSpec extends PlaySpec with BeforeAndAfterAll with MockitoSug
 
   "TodoController GET" must {
     "render the index page" in {
-      val request = FakeRequest(
-        method = GET,
-        uri = s"/users/$A_USER_ID/todos",
-        headers = FakeHeaders(Seq("Content-Type" -> "application/json")),
-        body = JsObject(Seq()))
+      val request = FakeRequest(GET, s"/users/$A_USER_ID/todos")
       val result: Future[Result] = controller.index(A_USER_ID)(request)
 
       status(result) mustBe OK

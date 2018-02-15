@@ -21,7 +21,7 @@ class TodoController @Inject()(
 
   private val BAD_REQUEST_RESPONSE = BadRequest(JsObject(Seq("response" -> JsString("failed"))))
 
-  def index(userId: UUID): Action[JsValue] = Action(parse.json) { implicit request =>
+  def index(userId: UUID) = Action { implicit request =>
     Logger.info(s"Executing TodoController.index")
     userRepository.get(userId) match {
       case Some(user) => {
