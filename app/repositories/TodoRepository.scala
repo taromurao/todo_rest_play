@@ -14,4 +14,6 @@ trait TodoRepository {
   }
 
   def save(user: User, todo: Todo): Unit
+
+  def update(user: User, todo: Todo): Unit
 }

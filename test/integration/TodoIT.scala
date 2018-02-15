@@ -39,10 +39,12 @@ class TodoIT extends BaseIT with BeforeAndAfterAll{
 
       contents must contain (todo2.content)
 
-      val responseUpdate: WSResponse = updateTodo(todo1update)
+      val todo1id: UUID = todos.find { t => t.title == todo1.title }.get.id
+      val responseUpdate: WSResponse = updateTodo(Todo(todo1id, todo1update.title, todo1update.content))
       responseUpdate.status mustBe OK
 
-      val todosUpdated: Set[Todo] = (response.json \ "data").validate[Set[Todo]].get
+      val responseUpdated: WSResponse = getTodos()
+      val todosUpdated: Set[Todo] = (responseUpdated.json \ "data").validate[Set[Todo]].get
       val titlesUpdated: Set[String] = todosUpdated map (_.title)
       val contentsUpdated: Set[String] = todosUpdated map (_.content)
 

@@ -50,6 +50,21 @@ class TodoController @Inject()(
     }
   }
 
+  def update(userId: UUID, todoId: UUID): Action[JsValue] = Action(parse.json) { implicit request: Request[JsValue] =>
+    userRepository.get(userId) match {
+      case Some(user) => {
+        request.body.validate[Todo] map {
+          case t @ Todo(_, _, _) => {
+            todoRepository.update(user, t)
+            Ok(JsObject(Seq("response" -> JsString("updated"))))
+          }
+          case _ => BAD_REQUEST_RESPONSE
+        } recoverTotal { _ => BAD_REQUEST_RESPONSE }
+      }
+      case _ => BAD_REQUEST_RESPONSE
+    }
+  }
+
   implicit private val titleContentReads: Reads[(String, String)] = (
     (__ \ 'title).read[String] and
     (__ \ 'content).read[String]

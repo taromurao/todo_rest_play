@@ -57,8 +57,19 @@ class TodoControllerSpec extends PlaySpec with BeforeAndAfterAll with MockitoSug
     }
   }
 
-//    private def createUser(): Unit = {
-//      val todoRepository: TodoRepository = new TodoRepository(stubControllerComponents()) {}
-//      todoRepository.save()
-//    }
+  "TodoController UPDATE" must {
+    "update a todo" in {
+      val request = FakeRequest(
+        method = PATCH,
+        uri = s"/users/$A_USER_ID/todos/${todo1update.id}",
+        headers = FakeHeaders(Seq("Content-Type" -> "application/json")),
+        body = Json.toJson(todo1update)
+      )
+      val result: Future[Result] = controller.update(A_USER_ID, todo1update.id)(request)
+
+      status(result) mustBe OK
+      contentType(result) mustBe Some("application/json")
+      verify(todoRepository, times(1)).update(A_USER, todo1update)
+    }
+  }
 }

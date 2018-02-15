@@ -22,5 +22,15 @@ class AnormTodoRepository @Inject()(db: Database) extends TodoRepository {
     db.withConnection { implicit conn: Connection => query.execute() }
   }
 
+  override def update(user: User, todo: Todo): Unit = {
+    val query: SqlQuery = SQL(s"""
+                              UPDATE todos
+                              SET title='${todo.title}', content='${todo.content}'
+                              WHERE id='${todo.id}'
+        """)
+
+    db.withConnection { implicit conn: Connection => query.execute() }
+  }
+
   private val todoParser: RowParser[Todo] = Macro.namedParser[Todo]
 }
