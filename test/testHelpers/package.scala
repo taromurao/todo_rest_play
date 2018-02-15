@@ -7,6 +7,8 @@ package object testHelpers {
 
   val todo2: Todo = Todo(UUID.fromString("49a08cc0-49c7-4c5d-a8a6-1319d1ebfa95"), "another todo", "This is a tough one.")
 
+  val todo1update: Todo = Todo(todo1.id, "new title", "new content")
+
   val A_USER_ID: UUID = UUID.fromString("6b18a6d3-dcd1-4652-9c94-8ef80e5e08ff")
 
   val AN_ENAIL: Email = "john@example.com"

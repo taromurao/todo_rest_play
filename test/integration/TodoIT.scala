@@ -1,8 +1,9 @@
 package integration
 
+import java.util.UUID
+
 import models.Todo
 import org.scalatest.BeforeAndAfterAll
-import play.api.Logger
 import play.api.libs.ws._
 import play.api.libs.json._
 import play.api.test.Helpers._
@@ -15,7 +16,7 @@ import testHelpers._
 class TodoIT extends BaseIT with BeforeAndAfterAll{
 
   "A user" must{
-    "be able to create a todos and view them" in {
+    "be able to CRUD " in {
       createTodo(todo1).status mustBe CREATED
 
       createTodo(todo2).status mustBe CREATED
@@ -37,13 +38,26 @@ class TodoIT extends BaseIT with BeforeAndAfterAll{
       contents must contain (todo1.content)
 
       contents must contain (todo2.content)
+
+      val responseUpdate: WSResponse = updateTodo(todo1update)
+      responseUpdate.status mustBe OK
+
+      val todosUpdated: Set[Todo] = (response.json \ "data").validate[Set[Todo]].get
+      val titlesUpdated: Set[String] = todosUpdated map (_.title)
+      val contentsUpdated: Set[String] = todosUpdated map (_.content)
+
+      titlesUpdated must contain (todo1update.title)
+
+      contentsUpdated must contain (todo1update.content)
     }
   }
 
   private val uri: String = s"$host/users/$A_USER_ID/todos"
 
-  private val request: WSRequest = wsClient
-    .url(uri)
+  private def request: WSRequest = request(None)
+
+  private def request(id: Option[UUID]) = wsClient
+    .url(uri + id.map { x: UUID => s"/$x"}.getOrElse(""))
     .addHttpHeaders("Content-Type" -> "application/json")
 
   private def createTodo(todo: Todo): WSResponse = {
@@ -54,4 +68,10 @@ class TodoIT extends BaseIT with BeforeAndAfterAll{
   }
 
   private def getTodos(): WSResponse = Await.result(request.get(), 1000 millis)
+
+  private def updateTodo(todo: Todo): WSResponse = {
+    val json: JsValue = Json.toJson(todo)
+
+    Await.result(request(Some(todo.id)).patch(json), 1000 millis)
+  }
 }
