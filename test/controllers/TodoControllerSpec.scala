@@ -27,7 +27,7 @@ class TodoControllerSpec extends PlaySpec with BeforeAndAfterAll with MockitoSug
 
   override def beforeAll(): Unit = {
     when(userRepository.get(A_USER_ID)) thenReturn Some(A_USER)
-    when(todoRepository.ofUser(A_USER)) thenReturn Set(todo1, todo2)
+    when(todoRepository.ofUser(A_USER)) thenReturn List(todo1, todo2)
   }
 
   "TodoController GET" must {
@@ -41,7 +41,7 @@ class TodoControllerSpec extends PlaySpec with BeforeAndAfterAll with MockitoSug
 
       status(result) mustBe OK
       contentType(result) mustBe Some("application/json")
-      (contentAsJson(result) \ "data").validate[Set[Todo]].getOrElse(None) mustBe Set(todo1, todo2)
+      (contentAsJson(result) \ "data").validate[List[Todo]].get.toSet mustBe Set(todo1, todo2)
     }
   }
 
@@ -57,7 +57,7 @@ class TodoControllerSpec extends PlaySpec with BeforeAndAfterAll with MockitoSug
 
       status(result) mustBe CREATED
       contentType(result) mustBe Some("application/json")
-      verify(todoRepository, times(1)).save(A_USER, todo1)
+      verify(todoRepository, times(1)).save(A_USER, todo1.title, todo1.content)
     }
   }
 
