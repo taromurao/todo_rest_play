@@ -1,0 +1,96 @@
+[33mcommit 1538c951227a88b8fbfff1ea87b12616d227d7bc[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Author: Taro Murao <taro.murao@gmail.com>
+Date:   Sun Feb 18 07:59:28 2018 +0100
+
+    extracted withUser method
+
+[1mdiff --git a/app/controllers/TodoController.scala b/app/controllers/TodoController.scala[m
+[1mindex 5e02921..dc38697 100644[m
+[1m--- a/app/controllers/TodoController.scala[m
+[1m+++ b/app/controllers/TodoController.scala[m
+[36m@@ -3,12 +3,11 @@[m [mpackage controllers[m
+ import java.util.UUID[m
+ import javax.inject._[m
+ [m
+[31m-import models.Todo[m
+[32m+[m[32mimport models.{Todo, User}[m
+ import play.api.Logger[m
+ import play.api.libs.json._[m
+ import play.api.mvc._[m
+ import play.api.libs.functional.syntax._[m
+[31m-[m
+ import repositories.{TodoRepository, UserRepository}[m
+ [m
+ import scala.util.{Success, Try}[m
+[36m@@ -22,45 +21,42 @@[m [mclass TodoController @Inject()([m
+   private val BAD_REQUEST_RESPONSE = BadRequest(JsObject(Seq("response" -> JsString("failed"))))[m
+ [m
+   def index(userId: UUID) = Action { implicit request =>[m
+[31m-    Logger.info(s"Executing TodoController.index")[m
+[31m-    userRepository.get(userId) match {[m
+[31m-      case Some(user) => {[m
+[31m-        Logger.info(s"Got user ${user}")[m
+[31m-        Try(todoRepository.ofUser(user)) match {[m
+[31m-          case Success(xs) => Ok(JsObject(Seq("response" -> JsString("ok"), "data" -> Json.toJson(xs))))[m
+[31m-          case _ => InternalServerError(JsObject(Seq("response" -> JsString("Database error"))))[m
+[31m-        }[m
+[32m+[m[32m    withUser(userId) { user =>[m
+[32m+[m[32m      Logger.info(s"Got user ${user}")[m
+[32m+[m[32m      Try(todoRepository.ofUser(user)) match {[m
+[32m+[m[32m        case Success(xs) => Ok(JsObject(Seq("response" -> JsString("ok"), "data" -> Json.toJson(xs))))[m
+[32m+[m[32m        case _ => InternalServerError(JsObject(Seq("response" -> JsString("Database error"))))[m
+       }[m
+[31m-      case _ => BAD_REQUEST_RESPONSE[m
+     }[m
+   }[m
+ [m
+   def create(userId: UUID): Action[JsValue] = Action(parse.json) { implicit request: Request[JsValue] =>[m
+[31m-    userRepository.get(userId) match {[m
+[31m-      case Some(user) => {[m
+[31m-        request.body.validate[(String, String)] map {[m
+[31m-          case (title, content) => {[m
+[31m-            todoRepository.save(user, title, content)[m
+[31m-            Created(JsObject(Seq("response" -> JsString("created"))))[m
+[31m-          }[m
+[31m-          case _ => BAD_REQUEST_RESPONSE[m
+[31m-        } recoverTotal { _ => BAD_REQUEST_RESPONSE }[m
+[31m-      }[m
+[31m-      case _ => BAD_REQUEST_RESPONSE[m
+[32m+[m[32m    withUser(userId) { user =>[m
+[32m+[m[32m      request.body.validate[(String, String)] map {[m
+[32m+[m[32m        case (title, content) => {[m
+[32m+[m[32m          todoRepository.save(user, title, content)[m
+[32m+[m[32m          Created(JsObject(Seq("response" -> JsString("created"))))[m
+[32m+[m[32m        }[m
+[32m+[m[32m        case _ => BAD_REQUEST_RESPONSE[m
+[32m+[m[32m      } recoverTotal { _ => BAD_REQUEST_RESPONSE }[m
+     }[m
+   }[m
+ [m
+   def update(userId: UUID, todoId: UUID): Action[JsValue] = Action(parse.json) { implicit request: Request[JsValue] =>[m
+[32m+[m[32m    withUser(userId) { user: User =>[m
+[32m+[m[32m      request.body.validate[Todo] map {[m
+[32m+[m[32m        case t@Todo(_, _, _) => {[m
+[32m+[m[32m          todoRepository.update(user, t)[m
+[32m+[m[32m          Ok(JsObject(Seq("response" -> JsString("updated"))))[m
+[32m+[m[32m        }[m
+[32m+[m[32m        case _ => BAD_REQUEST_RESPONSE[m
+[32m+[m[32m      } recoverTotal { _ => BAD_REQUEST_RESPONSE }[m
+[32m+[m[32m    }[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  private def withUser(userId: UUID)(f: User => Result): Result = {[m
+     userRepository.get(userId) match {[m
+[31m-      case Some(user) => {[m
+[31m-        request.body.validate[Todo] map {[m
+[31m-          case t @ Todo(_, _, _) => {[m
+[31m-            todoRepository.update(user, t)[m
+[31m-            Ok(JsObject(Seq("response" -> JsString("updated"))))[m
+[31m-          }[m
+[31m-          case _ => BAD_REQUEST_RESPONSE[m
+[31m-        } recoverTotal { _ => BAD_REQUEST_RESPONSE }[m
+[31m-      }[m
+[32m+[m[32m      case Some(user) => f(user)[m
+       case _ => BAD_REQUEST_RESPONSE[m
+     }[m
+   }[m

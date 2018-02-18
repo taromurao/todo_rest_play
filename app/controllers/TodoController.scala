@@ -4,7 +4,6 @@ import java.util.UUID
 import javax.inject._
 
 import models.{Todo, User}
-import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.libs.functional.syntax._
@@ -22,7 +21,6 @@ class TodoController @Inject()(
 
   def index(userId: UUID) = Action { implicit request =>
     withUser(userId) { user =>
-      Logger.info(s"Got user ${user}")
       Try(todoRepository.ofUser(user)) match {
         case Success(xs) => Ok(JsObject(Seq("response" -> JsString("ok"), "data" -> Json.toJson(xs))))
         case _ => InternalServerError(JsObject(Seq("response" -> JsString("Database error"))))
